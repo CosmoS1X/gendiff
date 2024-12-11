@@ -1,0 +1,44 @@
+{
+  "name": "@cosmo.org/gendiff",
+  "version": "1.0.0",
+  "description": "Gendiff is a CLI application for comparing files",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "scripts": {
+    "test": "npx jest",
+    "build": "npx tsc",
+    "type-check": "npx tsc --noEmit"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "setupFilesAfterEnv": [
+      "jest-sorted"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CosmoS1X/gendiff.git"
+  },
+  "author": "Konstantin Korovin <cosmo.stan@yandex.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CosmoS1X/gendiff/issues"
+  },
+  "homepage": "https://github.com/CosmoS1X/gendiff#readme",
+  "devDependencies": {
+    "@jest/globals": "^29.7.0",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.10.2",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "eslint": "^8.57.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-airbnb-typescript": "^18.0.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jest": "^28.9.0",
+    "jest": "^29.7.0",
+    "jest-sorted": "^1.0.15",
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.5.4"
+  }
+}
