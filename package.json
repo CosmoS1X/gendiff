@@ -1,9 +1,12 @@
 {
   "name": "@cosmo.org/gendiff",
   "version": "1.0.0",
-  "description": "Gendiff is a CLI application for comparing files",
+  "description": "Compares two configuration files and shows a difference",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
+  "bin": {
+    "gendiff": "dist/bin/gendiff.js"
+  },
   "scripts": {
     "test": "npx jest",
     "build": "npx tsc",
