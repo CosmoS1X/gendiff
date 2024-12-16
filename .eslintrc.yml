@@ -18,3 +18,4 @@ parserOptions:
   project: './tsconfig.eslint.json'
 rules:
   no-console: 'off'
+  object-curly-newline: 'off'
