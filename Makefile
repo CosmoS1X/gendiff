@@ -15,7 +15,7 @@ test:
 	npm test
 
 test-coverage:
-	npm test -- --coverage --coverageProvider=v8
+	npm test -- --coverage
 
 build:
 	npm run build
@@ -23,8 +23,8 @@ build:
 type-check:
 	npm run type-check
 
-run:
-	node dist/bin/gendiff.js
+run: build
+	node dist/bin/gendiff.js $(FILE1) $(FILE2)
 
 publish:
 	npm publish --dry-run
