@@ -38,25 +38,33 @@ const parseData = async (filepath: string) => {
 const makeDiff = (data1: ParsedData, data2: ParsedData): DiffItem[] => {
   const commonKeys = Array.from(new Set([...Object.keys(data1), ...Object.keys(data2)])).sort();
 
-  return commonKeys.map((key) => {
-    if (data1[key] === data2[key]) {
+  const diff = commonKeys.map((key) => {
+    const value = data1[key];
+    const newValue = data2[key];
+    const hasPropInData1 = Object.hasOwn(data1, key);
+    const hasPropInData2 = Object.hasOwn(data2, key);
+    const hasPropInBothData = hasPropInData1 && hasPropInData2;
+
+    if (value === newValue) {
       return { key, value: data1[key], type: DiffTypes.Unchanged };
     }
 
-    if (Object.hasOwn(data1, key) && Object.hasOwn(data2, key)) {
-      return { key, value: data1[key], newValue: data2[key], type: DiffTypes.Changed };
+    if (hasPropInBothData) {
+      return { key, value, newValue, type: DiffTypes.Changed };
     }
 
-    if (Object.hasOwn(data1, key)) {
-      return { key, value: data1[key], type: DiffTypes.Deleted };
+    if (hasPropInData1) {
+      return { key, value, type: DiffTypes.Deleted };
     }
 
-    if (Object.hasOwn(data2, key)) {
-      return { key, value: data2[key], type: DiffTypes.Added };
+    if (hasPropInData2) {
+      return { key, value: newValue, type: DiffTypes.Added };
     }
 
     throw new Error('An unexpected error occurred');
   });
+
+  return diff;
 };
 
 const makeDiffString = (prefix: string, key: string, value: unknown, depth = 1) => {
@@ -77,7 +85,7 @@ const formatDiff = (diff: DiffItem[]) => {
       case DiffTypes.Added:
         return [...acc, makeDiffString('+', key, value)];
       default:
-        throw new Error('Unknown diff type');
+        throw new Error(`Unknown diff type: ${type}`);
     }
   }, [] as string[]);
 
