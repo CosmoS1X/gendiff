@@ -60,7 +60,7 @@ const makeDiff = (data1: ParsedData, data2: ParsedData): DiffItem[] => {
     if (hasPropInData2) {
       return { key, value: newValue, type: DiffTypes.Added };
     }
-
+    /* istanbul ignore next */
     throw new Error('An unexpected error occurred');
   });
 
@@ -84,6 +84,7 @@ const formatDiff = (diff: DiffItem[]) => {
         return [...acc, makeDiffString('-', key, value)];
       case DiffTypes.Added:
         return [...acc, makeDiffString('+', key, value)];
+      /* istanbul ignore next */
       default:
         throw new Error(`Unknown diff type: ${type}`);
     }
