@@ -9,6 +9,6 @@ program
   .argument('<filepath2>')
   .option('-f, --format [type]', 'output format')
   .action(async (filepath1: string, filepath2: string) => {
-    await genDiff(filepath1, filepath2);
+    console.log(await genDiff(filepath1, filepath2));
   })
   .parse();
