@@ -16,3 +16,10 @@ it('should compare files with stylish format', async () => {
   expect(actualJSON).toBe(expected);
   expect(actualYAML).toBe(expected);
 });
+
+it('should throw if the file format is not supported', async () => {
+  const supported = getFixturePath('file1.json');
+  const unsupported = getFixturePath('stylish.txt');
+
+  await expect(genDiff(supported, unsupported)).rejects.toThrow();
+});
