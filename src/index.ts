@@ -1,22 +1,18 @@
 import path from 'path';
 import { readFile } from 'fs/promises';
 import parse from './parsers';
+import type {
+  FormatsUnion,
+  ParsedData,
+  DiffItem,
+} from './types';
 
-enum DiffTypes {
+export enum DiffTypes {
   Unchanged = 'unchanged',
   Changed = 'changed',
   Deleted = 'deleted',
   Added = 'added',
 }
-
-export type FormatsUnion = 'json' | 'yml' | 'yaml';
-type ParsedData = { [key: string]: unknown };
-type DiffItem = {
-  key: string,
-  value: unknown,
-  newValue?: unknown,
-  type: DiffTypes,
-};
 
 const formats: FormatsUnion[] = ['json', 'yml', 'yaml'];
 
@@ -90,8 +86,10 @@ const formatDiff = (diff: DiffItem[]) => {
 };
 
 export default async (filepath1: string, filepath2: string) => {
-  const parsedData1 = parse(await getData(filepath1), getFormat(filepath1));
-  const parsedData2 = parse(await getData(filepath2), getFormat(filepath2));
+  const data1 = await getData(filepath1);
+  const data2 = await getData(filepath2);
+  const parsedData1 = parse(data1, getFormat(filepath1));
+  const parsedData2 = parse(data2, getFormat(filepath2));
   const diff = makeDiff(parsedData1, parsedData2);
 
   return formatDiff(diff);

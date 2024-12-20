@@ -1,7 +1,5 @@
 import yaml from 'js-yaml';
-import type { FormatsUnion } from './index';
-
-type ParsersUnion = typeof JSON.parse | typeof yaml.load;
+import type { FormatsUnion, ParsersUnion } from './types';
 
 const parsers: Record<FormatsUnion, ParsersUnion> = {
   json: JSON.parse,
