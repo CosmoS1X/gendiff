@@ -1,38 +1,34 @@
 import path from 'path';
 import { readFile } from 'fs/promises';
+import parse from './parsers';
+import type {
+  FormatsUnion,
+  ParsedData,
+  DiffItem,
+} from './types';
 
-enum DiffTypes {
+export enum DiffTypes {
   Unchanged = 'unchanged',
   Changed = 'changed',
   Deleted = 'deleted',
   Added = 'added',
 }
 
-type FormatsUnion = 'json';
-type ParsersUnion = JSON['parse'];
-type ParsedData = { [key: string]: unknown };
-type DiffItem = {
-  key: string,
-  value: unknown,
-  newValue?: unknown,
-  type: DiffTypes,
-};
-
-const parsers: Record<FormatsUnion, ParsersUnion> = {
-  json: JSON.parse,
-};
+const formats: FormatsUnion[] = ['json', 'yml', 'yaml'];
 
 const getAbsolutePath = (filepath: string) => path.resolve(process.cwd(), filepath);
 
 const getData = (filepath: string) => readFile(getAbsolutePath(filepath), { encoding: 'utf-8' });
 
-const getFormat = (filepath: string) => path.extname(filepath).slice(1) as FormatsUnion;
+const getFormat = (filepath: string) => {
+  const { base, ext } = path.parse(filepath);
+  const format = ext.slice(1) as FormatsUnion;
 
-const parseData = async (filepath: string) => {
-  const data = await getData(filepath);
-  const format = getFormat(filepath);
+  if (!formats.includes(format)) {
+    throw new Error(`The extension '${ext}' of file '${base}' is not supported`);
+  }
 
-  return parsers[format](data);
+  return format;
 };
 
 const makeDiff = (data1: ParsedData, data2: ParsedData): DiffItem[] => {
@@ -45,23 +41,19 @@ const makeDiff = (data1: ParsedData, data2: ParsedData): DiffItem[] => {
     const hasPropInData2 = Object.hasOwn(data2, key);
     const hasPropInBothData = hasPropInData1 && hasPropInData2;
 
-    if (value === newValue) {
-      return { key, value: data1[key], type: DiffTypes.Unchanged };
+    switch (true) {
+      case value === newValue:
+        return { key, value: data1[key], type: DiffTypes.Unchanged };
+      case hasPropInBothData:
+        return { key, value, newValue, type: DiffTypes.Changed };
+      case hasPropInData1:
+        return { key, value, type: DiffTypes.Deleted };
+      case hasPropInData2:
+        return { key, value: newValue, type: DiffTypes.Added };
+      /* istanbul ignore next */
+      default:
+        throw new Error('An unexpected error occurred');
     }
-
-    if (hasPropInBothData) {
-      return { key, value, newValue, type: DiffTypes.Changed };
-    }
-
-    if (hasPropInData1) {
-      return { key, value, type: DiffTypes.Deleted };
-    }
-
-    if (hasPropInData2) {
-      return { key, value: newValue, type: DiffTypes.Added };
-    }
-    /* istanbul ignore next */
-    throw new Error('An unexpected error occurred');
   });
 
   return diff;
@@ -94,9 +86,11 @@ const formatDiff = (diff: DiffItem[]) => {
 };
 
 export default async (filepath1: string, filepath2: string) => {
-  const data1 = await parseData(filepath1);
-  const data2 = await parseData(filepath2);
-  const diff = makeDiff(data1, data2);
+  const data1 = await getData(filepath1);
+  const data2 = await getData(filepath2);
+  const parsedData1 = parse(data1, getFormat(filepath1));
+  const parsedData2 = parse(data2, getFormat(filepath2));
+  const diff = makeDiff(parsedData1, parsedData2);
 
   return formatDiff(diff);
 };
