@@ -1,13 +1,13 @@
 import yaml from 'js-yaml';
-import { DiffTypes } from './index';
+import { DiffTypes } from './makeDiff';
 
 export type FormatsUnion = 'json' | 'yml' | 'yaml';
 export type ParsersUnion = typeof JSON.parse | typeof yaml.load;
 export type ParsedData = { [key: string]: unknown };
-export type DiffItem = {
+export type Diff = {
   key: string,
   value?: unknown,
   newValue?: unknown,
-  children?: DiffItem[],
+  children?: Diff[],
   type: DiffTypes,
 };
