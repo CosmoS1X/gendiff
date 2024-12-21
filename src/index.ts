@@ -1,26 +1,23 @@
 import path from 'path';
 import { readFile } from 'fs/promises';
 import parse from './parsers';
-import type {
-  FormatsUnion,
-  ParsedData,
-  DiffItem,
-} from './types';
+import type { FormatsUnion, ParsedData, DiffItem } from './types';
 
 export enum DiffTypes {
   Unchanged = 'unchanged',
   Changed = 'changed',
   Deleted = 'deleted',
   Added = 'added',
+  Nested = 'nested',
 }
 
 const formats: FormatsUnion[] = ['json', 'yml', 'yaml'];
 
-const getAbsolutePath = (filepath: string) => path.resolve(process.cwd(), filepath);
+const getAbsolutePath = (filepath: string): string => path.resolve(process.cwd(), filepath);
 
 const getData = (filepath: string) => readFile(getAbsolutePath(filepath), { encoding: 'utf-8' });
 
-const getFormat = (filepath: string) => {
+const getFormat = (filepath: string): FormatsUnion => {
   const { base, ext } = path.parse(filepath);
   const format = ext.slice(1) as FormatsUnion;
 
@@ -40,10 +37,17 @@ const makeDiff = (data1: ParsedData, data2: ParsedData): DiffItem[] => {
     const hasPropInData1 = Object.hasOwn(data1, key);
     const hasPropInData2 = Object.hasOwn(data2, key);
     const hasPropInBothData = hasPropInData1 && hasPropInData2;
+    const hasChildren = typeof value === 'object' && typeof newValue === 'object';
 
     switch (true) {
+      case hasChildren:
+        return {
+          key,
+          children: makeDiff(value as ParsedData, newValue as ParsedData),
+          type: DiffTypes.Nested,
+        };
       case value === newValue:
-        return { key, value: data1[key], type: DiffTypes.Unchanged };
+        return { key, value, type: DiffTypes.Unchanged };
       case hasPropInBothData:
         return { key, value, newValue, type: DiffTypes.Changed };
       case hasPropInData1:
@@ -59,33 +63,51 @@ const makeDiff = (data1: ParsedData, data2: ParsedData): DiffItem[] => {
   return diff;
 };
 
-const makeDiffString = (prefix: string, key: string, value: unknown, depth = 1) => {
-  const tab = '  ';
+const getTab = (depth: number, offset = 0): string => {
+  const tabChar = ' ';
+  const tabCount = 4;
 
-  return `${tab.repeat(depth)}${prefix} ${key}: ${value}`;
+  return tabChar.repeat(depth * tabCount - offset);
 };
 
-const formatDiff = (diff: DiffItem[]) => {
-  const result = diff.reduce((acc, { key, value, newValue, type }) => {
-    switch (type) {
-      case DiffTypes.Unchanged:
-        return [...acc, makeDiffString(' ', key, value)];
-      case DiffTypes.Changed:
-        return [...acc, makeDiffString('-', key, value), makeDiffString('+', key, newValue)];
-      case DiffTypes.Deleted:
-        return [...acc, makeDiffString('-', key, value)];
-      case DiffTypes.Added:
-        return [...acc, makeDiffString('+', key, value)];
-      /* istanbul ignore next */
-      default:
-        throw new Error(`Unknown diff type: ${type}`);
-    }
-  }, [] as string[]);
+const makeDiffString = (key: string, value: unknown, depth: number, prefix = ' '): string => {
+  if (value !== null && typeof value === 'object') {
+    const children = Object.entries(value)
+      .map(([childKey, childValue]) => makeDiffString(childKey, childValue, depth + 1)).join('\n');
 
-  return `{\n${result.join('\n')}\n}`;
+    return `${getTab(depth, 2)}${prefix} ${key}: {\n${children}\n${getTab(depth)}}`;
+  }
+
+  return `${getTab(depth, 2)}${prefix} ${key}: ${value}`;
 };
 
-export default async (filepath1: string, filepath2: string) => {
+const formatDiff = (diff: DiffItem[]): string => {
+  const iter = (data: DiffItem[], depth = 1): string => {
+    const result = data.map(({ key, value, newValue, children, type }) => {
+      switch (type) {
+        case DiffTypes.Nested:
+          return makeDiffString(key, iter(children as DiffItem[], depth + 1), depth);
+        case DiffTypes.Unchanged:
+          return makeDiffString(key, value, depth);
+        case DiffTypes.Changed:
+          return `${makeDiffString(key, value, depth, '-')}\n${makeDiffString(key, newValue, depth, '+')}`;
+        case DiffTypes.Deleted:
+          return makeDiffString(key, value, depth, '-');
+        case DiffTypes.Added:
+          return makeDiffString(key, value, depth, '+');
+        /* istanbul ignore next */
+        default:
+          throw new Error(`Unknown diff type: ${type}`);
+      }
+    }).join('\n');
+
+    return `{\n${result}\n${getTab(depth, 4)}}`;
+  };
+
+  return iter(diff);
+};
+
+export default async (filepath1: string, filepath2: string): Promise<string> => {
   const data1 = await getData(filepath1);
   const data2 = await getData(filepath2);
   const parsedData1 = parse(data1, getFormat(filepath1));

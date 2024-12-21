@@ -6,7 +6,8 @@ export type ParsersUnion = typeof JSON.parse | typeof yaml.load;
 export type ParsedData = { [key: string]: unknown };
 export type DiffItem = {
   key: string,
-  value: unknown,
+  value?: unknown,
   newValue?: unknown,
+  children?: DiffItem[],
   type: DiffTypes,
 };
