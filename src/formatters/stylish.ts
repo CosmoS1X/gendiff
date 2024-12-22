@@ -8,7 +8,7 @@ const makeIndent = (depth: number, offset = 2): string => {
   return indentChar.repeat(depth * indentSize - offset);
 };
 
-const formatValue = (value: any, depth: number): string => {
+const formatValue = (value: unknown, depth: number): string => {
   if (typeof value !== 'object' || value === null) {
     return String(value);
   }
