@@ -5,8 +5,6 @@ import makeDiff from './makeDiff';
 import formatDiff from './formatters';
 import type { FormatsUnion, FormattersUnion } from './types';
 
-const formats: FormatsUnion[] = ['json', 'yml', 'yaml'];
-
 const getAbsolutePath = (filepath: string): string => path.resolve(process.cwd(), filepath);
 
 const getData = (filepath: string) => readFile(getAbsolutePath(filepath), { encoding: 'utf-8' });
@@ -14,8 +12,9 @@ const getData = (filepath: string) => readFile(getAbsolutePath(filepath), { enco
 const getFormat = (filepath: string): FormatsUnion => {
   const { base, ext } = path.parse(filepath);
   const format = ext.slice(1) as FormatsUnion;
+  const supportedFormats: FormatsUnion[] = ['json', 'yml', 'yaml'];
 
-  if (!formats.includes(format)) {
+  if (!supportedFormats.includes(format)) {
     throw new Error(`The extension '${ext}' of file '${base}' is not supported`);
   }
 
