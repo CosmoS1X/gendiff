@@ -29,5 +29,5 @@ export default async (filepath1: string, filepath2: string, formatter: Formatter
   const parsedData2 = parse(data2, getFormat(filepath2));
   const diff = makeDiff(parsedData1, parsedData2);
 
-  return `{\n${formatDiff(diff, formatter)}\n}`;
+  return formatDiff(diff, formatter);
 };
