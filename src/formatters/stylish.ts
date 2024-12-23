@@ -37,14 +37,14 @@ const formatDiff = (diff: Diff[], depth: number = 1): string => {
           `${indent}+ ${key}: ${formatValue(newValue, depth)}`,
         ].join('\n');
       case DiffTypes.Nested:
-        return `${indent}  ${key}: {\n${formatDiff(children as Diff[], depth + 1)}\n${makeIndent(depth, 0)}}`;
+        return `${indent}  ${key}: ${formatDiff(children as Diff[], depth + 1)}`;
       /* istanbul ignore next */
       default:
         throw new Error(`Unknown diff type: ${type}`);
     }
   });
 
-  return formattedDiff.join('\n');
+  return `{\n${formattedDiff.join('\n')}\n${makeIndent(depth, 4)}}`;
 };
 
 export default formatDiff;
