@@ -1,7 +1,6 @@
 import path from 'path';
 import { readFile } from 'fs/promises';
 import genDiff from '../src/index';
-import { FormattersUnion } from '../src/types';
 
 const getFixturePath = (filename: string) => path.join(__dirname, '..', '__fixtures__', filename);
 
@@ -24,6 +23,23 @@ it('should compare files with plain format', async () => {
   await expect(genDiff(yaml1, yaml2, 'plain')).resolves.toBe(plainDiff);
 });
 
+it('should compare files with json format', async () => {
+  const isValidJson = (json: string): boolean => {
+    try {
+      JSON.parse(json);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const actualDiff = await genDiff(json1, json2, 'json');
+  const jsonDiff = await readFile(getFixturePath('json.txt'), 'utf-8');
+
+  expect(isValidJson(actualDiff)).toBe(true);
+  expect(actualDiff).toBe(jsonDiff);
+});
+
 it('should throw if the file format is not supported', async () => {
   const supported = getFixturePath('file1.json');
   const unsupported = getFixturePath('stylish.txt');
@@ -32,5 +48,5 @@ it('should throw if the file format is not supported', async () => {
 });
 
 it('should throw if the formatter is unknown', async () => {
-  await expect(genDiff(json1, json2, 'unknown' as FormattersUnion)).rejects.toThrow();
+  await expect(genDiff(json1, json2, 'unknown' as any)).rejects.toThrow();
 });
