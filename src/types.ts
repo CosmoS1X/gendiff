@@ -3,7 +3,7 @@ import { DiffTypes } from './makeDiff';
 
 export type FormatsUnion = 'json' | 'yml' | 'yaml';
 export type ParsersUnion = typeof JSON.parse | typeof yaml.load;
-export type FormattersUnion = 'stylish' | 'plain';
+export type FormattersUnion = 'stylish' | 'plain' | 'json';
 export type ParsedData = { [key: string]: unknown };
 export type Diff = {
   key: string,
