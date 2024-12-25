@@ -1,5 +1,5 @@
 {
-  "name": "@cosmo.org/gendiff",
+  "name": "@cosmo.dev/gendiff",
   "version": "1.0.0",
   "description": "Compares two configuration files and shows a difference",
   "main": "dist/src/index.js",
