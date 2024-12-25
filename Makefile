@@ -27,6 +27,6 @@ run: build
 	node dist/bin/gendiff.js $(FILE1) $(FILE2)
 
 publish:
-	npm publish --dry-run
+	npm publish --access=public
 
 .PHONY: test
