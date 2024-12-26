@@ -6,22 +6,14 @@
 
 ## Description
 
-`gendiff` is a command-line utility that generates a diff between two configuration files. It supports JSON and YAML formats. The tool provides a human-readable output that shows the differences between the files. `gendiff` supports the following output formats: `stylish`, `plain`, and `json`. Additionally, it supports both absolute and relative file paths.
+Gendiff is a command-line utility that generates a diff between two configuration files. It supports JSON and YAML formats. The tool provides a human-readable output that shows the differences between the files. Gendiff supports the following output formats: `stylish`, `plain`, and `json`. Additionally, it supports both absolute and relative file paths.
 
 ## Installation
 
-To install package, use the following command:
+To install, use the following command:
 
 ```sh
-npm i @cosmo.dev/gendiff
-```
-
-To install `gendiff` utility locally, use the following commands:
-
-```sh
-git clone git@github.com:CosmoS1X/gendiff.git
-cd gendiff
-make install
+npm install -g @cosmo.dev/gendiff
 ```
 
 ## Usage
