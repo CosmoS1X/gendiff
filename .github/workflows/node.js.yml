@@ -28,7 +28,7 @@ jobs:
         cache: 'npm'
     - run: make deps-install
     - run: make type-check
-    - run: make test
+    - run: make test-coverage
     - run: make lint
     - run: make build
     - uses: qltysh/qlty-action/coverage@v2
