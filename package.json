@@ -14,9 +14,8 @@
   },
   "jest": {
     "preset": "ts-jest",
-    "setupFilesAfterEnv": [
-      "jest-sorted"
-    ]
+    "coverageDirectory": "coverage",
+    "coverageReporters": ["lcov", "html", "text-summary"]
   },
   "repository": {
     "type": "git",
